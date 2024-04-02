@@ -10,7 +10,13 @@ Frameworks/Technologies we will use:
 
 ### The processing of this application involves two components:
 1. Prepare the documents (VectorStore)
+
+![image](https://github.com/somilg050/rag-aws-bedrock/assets/31178867/3c30ce1a-b40f-4ada-a62b-2457a7d713da)
+
 2. Retrieve the relevant documents and frame the response using LLM.
+
+![image](https://github.com/somilg050/rag-aws-bedrock/assets/31178867/cbbe43a8-0b2c-4b35-8e5d-c760a3abb02d)
+
 
 ---
 
