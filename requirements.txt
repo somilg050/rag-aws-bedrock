@@ -1,0 +1,8 @@
+awscli
+pypdf
+streamlit
+llama_index
+boto3
+llama-index-llms-bedrock
+faiss-cpu
+langchain
