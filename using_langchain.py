@@ -31,7 +31,7 @@ def data_ingestion():
     documents = loader.load()
     # Split the text into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,
-                                                   chunk_overlap=0)
+                                                   chunk_overlap=250)
     docs = text_splitter.split_documents(documents)
     return docs
 
