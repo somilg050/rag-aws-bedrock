@@ -5,11 +5,11 @@ import streamlit as st
 # In this example, we'll use the AWS Titan Embeddings model to generate embeddings.
 # You can use any model that generates embeddings.
 from langchain_community.embeddings.bedrock import BedrockEmbeddings
-from langchain_community.llms.bedrock import Bedrock
 
 # Load the Titan Embeddings using Bedrock client.
 bedrock = boto3.client(service_name='bedrock-runtime')
-titan_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1", client=bedrock)
+titan_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",
+                                     client=bedrock)
 
 # Vector Store for Vector Embeddings
 from langchain_community.vectorstores.faiss import FAISS
@@ -21,6 +21,9 @@ from langchain.prompts import PromptTemplate
 # Imports for Data Ingestion
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.pdf import PyPDFDirectoryLoader
+
+# Import Bedrock for LLM
+from langchain_community.llms.bedrock import Bedrock
 
 # Load the PDFs from the directory
 def data_ingestion():
@@ -44,7 +47,7 @@ def setup_vector_store(documents):
 
 # Load the LLM from the Bedrock
 def load_llm():
-    llm = Bedrock(model_id="amazon.titan-text-express-v1", client=bedrock, model_kwargs={"maxTokenCount": 512})
+    llm = Bedrock(model_id="mistral.mistral-large-2402-v1:0", client=bedrock, model_kwargs={"max_tokens": 512})
     return llm
 
 # Create a prompt template
@@ -76,7 +79,6 @@ def create_retrieval_qa_chain(llm, vector_store):
 # Get the response from the LLM
 def get_response(retrieval_qa, query):
     response = retrieval_qa.invoke(query)
-    print(response)
     #if no source_documents are found, return a default response
     if not response['source_documents']:
         return "I am sorry, I do not have an answer to that."
@@ -97,7 +99,7 @@ def streamlit_ui():
                 setup_vector_store(docs)
                 st.success("Done")
 
-    if st.button("Generate Response"):
+    if st.button("Generate Response") or user_question:
         # first check if the vector store exists
         if not os.path.exists("faiss_index"):
             st.error("Please create the vector store first from the sidebar.")
@@ -111,11 +113,8 @@ def streamlit_ui():
             llm = load_llm()
 
             retrieval_qa = create_retrieval_qa_chain(llm, faiss_index)
-            print('retrieval_qa: ', retrieval_qa)
             st.write(get_response(retrieval_qa, user_question))
             st.success("Done")
-
-
 
 if __name__ == "__main__":
     streamlit_ui()
