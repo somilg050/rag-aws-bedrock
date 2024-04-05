@@ -14,7 +14,7 @@ titan_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",
 # Vector Store for Vector Embeddings
 from langchain_community.vectorstores.faiss import FAISS
 
-# Load RetrievalQA from langchain as it provides a simple interface to interact with the AWS Bedrock.
+# Load RetrievalQA from langchain as it provides a simple interface to interact with the LLM.
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.prompts import PromptTemplate
 
@@ -63,8 +63,8 @@ Helpful Answer:"""
 # Now we use langchain PromptTemplate to create the prompt template for our LLM
 PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
-# Create a RetrievalQA chain
-def create_retrieval_qa_chain(llm, vector_store):
+# Create a RetrievalQA chain and invoke the LLM
+def get_response(llm, vector_store, query):
     retrieval_qa = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
@@ -74,14 +74,7 @@ def create_retrieval_qa_chain(llm, vector_store):
         chain_type_kwargs={"prompt": PROMPT},
         return_source_documents=True,
     )
-    return retrieval_qa
-
-# Get the response from the LLM
-def get_response(retrieval_qa, query):
     response = retrieval_qa.invoke(query)
-    #if no source_documents are found, return a default response
-    if not response['source_documents']:
-        return "I am sorry, I do not have an answer to that."
     return response['result']
 
 def streamlit_ui():
@@ -111,9 +104,7 @@ def streamlit_ui():
             faiss_index = FAISS.load_local("faiss_index", embeddings=titan_embeddings,
                                            allow_dangerous_deserialization=True)
             llm = load_llm()
-
-            retrieval_qa = create_retrieval_qa_chain(llm, faiss_index)
-            st.write(get_response(retrieval_qa, user_question))
+            st.write(get_response(llm, faiss_index, user_question))
             st.success("Done")
 
 if __name__ == "__main__":
